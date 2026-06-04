@@ -1,187 +1,177 @@
--- =================================================================
--- EDM-DDL.sql - Ellison Digital Minerals SQL Schema
--- Episode 4+ - EDM CICS Tutorial Series
--- Replaces VSAM KSDS backend with relational tables
--- Compatible with: DB2, SQLite, PostgreSQL
--- =================================================================
+-- EDM-DDL.sql -- Ellison Digital Minerals operational database schema
+-- Run once against the 'edm' PostgreSQL database before starting BRICKS_TS.
+-- Pattern follows bank_schema.sql: NUMERIC(15,2) for money,
+-- reserved VARCHAR(80) columns for future expansion, BEGIN/COMMIT wrapper.
+--
+-- Create the database first:
+--   createdb -U bricks edm
+--   psql -U bricks edm < EDM-DDL.sql
 
--- ---------------------------------------------------------------
--- EDMMST - Master Client Registry
--- Mirrors VSAM KSDS layout from EDMMSTR.cpy copybook
--- ---------------------------------------------------------------
-CREATE TABLE EDMMST (
-    CLIENT_ID        CHAR(8)         NOT NULL,
-    CLIENT_TYPE      CHAR(1)         NOT NULL DEFAULT 'A',
-    ANNOYANCE_RANK   SMALLINT        NOT NULL DEFAULT 0,
-    LAST_NAME        CHAR(20)        NOT NULL,
-    FIRST_NAME       CHAR(15)        NOT NULL,
-    TITLE            CHAR(4),
-    DEPARTMENT       CHAR(20),
-    LOCATION         CHAR(3),
-    STATUS           CHAR(1)         NOT NULL DEFAULT 'P',
-    CREATED_DATE     DECIMAL(8,0)    NOT NULL,
-    LAST_ACTIVITY    DECIMAL(8,0),
-    LAST_MODIFIED    DECIMAL(8,0),
-    ASSET_COUNT      INTEGER         NOT NULL DEFAULT 0,
-    ASSET_VALUE      DECIMAL(13,2)   NOT NULL DEFAULT 0,
-    FLAG_AUDIT       CHAR(1)         NOT NULL DEFAULT 'N',
-    FLAG_HOLD        CHAR(1)         NOT NULL DEFAULT 'N',
-    FLAG_VIP         CHAR(1)         NOT NULL DEFAULT 'N',
-    CONSTRAINT PK_EDMMST PRIMARY KEY (CLIENT_ID),
-    CONSTRAINT CK_EDMMST_TYPE
-        CHECK (CLIENT_TYPE IN ('A','C','G','R')),
-    CONSTRAINT CK_EDMMST_STATUS
-        CHECK (STATUS IN ('A','S','T','P')),
-    CONSTRAINT CK_EDMMST_LOC
-        CHECK (LOCATION IN ('ALB','SYR','NYC','RMT'))
+BEGIN;
+
+-- -------------------------------------------------------------------
+-- edm_clients -- Master client registry (EDMMST)
+-- Primary key: client_id CHAR(8), zero-padded
+-- -------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS edm_clients (
+    client_id        CHAR(8)         PRIMARY KEY,
+    client_type      CHAR(1)         NOT NULL DEFAULT 'A',
+    -- A=Acquisition Specialist C=Corporate G=Government R=Research
+    annoyance_rank   SMALLINT        NOT NULL DEFAULT 0,
+    last_name        VARCHAR(20)     NOT NULL,
+    first_name       VARCHAR(15)     NOT NULL,
+    title            CHAR(4)         NOT NULL DEFAULT '',
+    department       VARCHAR(20)     NOT NULL DEFAULT '',
+    location         CHAR(3)         NOT NULL DEFAULT 'ALB',
+    -- ALB=Albany SYR=Syracuse NYC=New York RMT=Remote
+    status           CHAR(1)         NOT NULL DEFAULT 'P',
+    -- A=Active S=Suspended T=Terminated P=Pending
+    created_date     DATE            NOT NULL DEFAULT CURRENT_DATE,
+    last_activity    DATE,
+    last_modified    DATE,
+    asset_count      INTEGER         NOT NULL DEFAULT 0,
+    asset_value      NUMERIC(15,2)   NOT NULL DEFAULT 0,
+    flag_audit       CHAR(1)         NOT NULL DEFAULT 'N',
+    flag_hold        CHAR(1)         NOT NULL DEFAULT 'N',
+    flag_vip         CHAR(1)         NOT NULL DEFAULT 'N',
+    -- VIP = CEO contact; do not adjust annoyance_rank without approval
+    reserved1        VARCHAR(80)     NOT NULL DEFAULT '',
+    reserved2        VARCHAR(80)     NOT NULL DEFAULT '',
+    reserved3        VARCHAR(80)     NOT NULL DEFAULT '',
+    reserved4        VARCHAR(80)     NOT NULL DEFAULT '',
+    reserved5        VARCHAR(80)     NOT NULL DEFAULT ''
 );
 
--- ---------------------------------------------------------------
--- EDMORD - Acquisition Order Processing
--- ---------------------------------------------------------------
-CREATE TABLE EDMORD (
-    ORDER_ID         CHAR(10)        NOT NULL,
-    CLIENT_ID        CHAR(8)         NOT NULL,
-    ORDER_TYPE       CHAR(2)         NOT NULL,
-    -- MA=Mineral Acquisition, DA=Data Acquisition,
-    -- HA=Hardware Acquisition, SA=System Acquisition
-    ORDER_STATUS     CHAR(1)         NOT NULL DEFAULT 'P',
-    -- P=Pending, A=Approved, R=Rejected, C=Complete, X=Cancelled
-    ORDER_DATE       DECIMAL(8,0)    NOT NULL,
-    REQUIRED_DATE    DECIMAL(8,0),
-    COMPLETE_DATE    DECIMAL(8,0),
-    ORDER_VALUE      DECIMAL(13,2)   NOT NULL DEFAULT 0,
-    APPROVED_BY      CHAR(8),
-    NOTES            VARCHAR(254),
-    CONSTRAINT PK_EDMORD PRIMARY KEY (ORDER_ID),
-    CONSTRAINT FK_EDMORD_CLIENT
-        FOREIGN KEY (CLIENT_ID) REFERENCES EDMMST(CLIENT_ID),
-    CONSTRAINT CK_EDMORD_TYPE
-        CHECK (ORDER_TYPE IN ('MA','DA','HA','SA')),
-    CONSTRAINT CK_EDMORD_STATUS
-        CHECK (ORDER_STATUS IN ('P','A','R','C','X'))
+CREATE INDEX IF NOT EXISTS edm_clients_name_idx
+    ON edm_clients (last_name, first_name);
+CREATE INDEX IF NOT EXISTS edm_clients_status_idx
+    ON edm_clients (status, location);
+
+-- -------------------------------------------------------------------
+-- edm_orders -- Acquisition order processing (EDMORD)
+-- -------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS edm_orders (
+    order_id         CHAR(10)        PRIMARY KEY,
+    client_id        CHAR(8)         NOT NULL
+                                     REFERENCES edm_clients(client_id),
+    order_type       CHAR(2)         NOT NULL,
+    -- MA=Mineral DA=Data HA=Hardware SA=System
+    order_status     CHAR(1)         NOT NULL DEFAULT 'P',
+    -- P=Pending A=Approved R=Rejected C=Complete X=Cancelled
+    order_date       DATE            NOT NULL DEFAULT CURRENT_DATE,
+    required_date    DATE,
+    complete_date    DATE,
+    order_value      NUMERIC(15,2)   NOT NULL DEFAULT 0,
+    approved_by      CHAR(8),
+    notes            VARCHAR(254)    NOT NULL DEFAULT '',
+    reserved1        VARCHAR(80)     NOT NULL DEFAULT '',
+    reserved2        VARCHAR(80)     NOT NULL DEFAULT '',
+    reserved3        VARCHAR(80)     NOT NULL DEFAULT '',
+    reserved4        VARCHAR(80)     NOT NULL DEFAULT '',
+    reserved5        VARCHAR(80)     NOT NULL DEFAULT ''
 );
 
--- ---------------------------------------------------------------
--- EDMINV - Asset Inventory
--- Minerals, data assets, legacy hardware
--- ---------------------------------------------------------------
-CREATE TABLE EDMINV (
-    ASSET_ID         CHAR(12)        NOT NULL,
-    ASSET_TYPE       CHAR(2)         NOT NULL,
-    -- MI=Mineral, DT=Data, HW=Hardware, SW=Software, AR=Archive
-    ASSET_NAME       CHAR(40)        NOT NULL,
-    CLIENT_ID        CHAR(8),
-    ORDER_ID         CHAR(10),
-    STATUS           CHAR(1)         NOT NULL DEFAULT 'A',
-    -- A=Active, H=Hold, D=Disposed, T=Transferred
-    ACQUIRED_DATE    DECIMAL(8,0),
-    VALUE_ORIGINAL   DECIMAL(13,2)   NOT NULL DEFAULT 0,
-    VALUE_CURRENT    DECIMAL(13,2)   NOT NULL DEFAULT 0,
-    LOCATION_CODE    CHAR(6),
-    NOTES            VARCHAR(254),
-    CONSTRAINT PK_EDMINV PRIMARY KEY (ASSET_ID),
-    CONSTRAINT FK_EDMINV_CLIENT
-        FOREIGN KEY (CLIENT_ID) REFERENCES EDMMST(CLIENT_ID),
-    CONSTRAINT CK_EDMINV_TYPE
-        CHECK (ASSET_TYPE IN ('MI','DT','HW','SW','AR'))
+CREATE INDEX IF NOT EXISTS edm_orders_client_idx
+    ON edm_orders (client_id, order_date);
+
+-- -------------------------------------------------------------------
+-- edm_inventory -- Asset catalog (EDMINV)
+-- -------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS edm_inventory (
+    asset_id         CHAR(12)        PRIMARY KEY,
+    asset_type       CHAR(2)         NOT NULL,
+    -- MI=Mineral DT=Data HW=Hardware SW=Software AR=Archive
+    asset_name       VARCHAR(40)     NOT NULL,
+    client_id        CHAR(8)         REFERENCES edm_clients(client_id),
+    order_id         CHAR(10)        REFERENCES edm_orders(order_id),
+    status           CHAR(1)         NOT NULL DEFAULT 'A',
+    -- A=Active H=Hold D=Disposed T=Transferred
+    acquired_date    DATE,
+    value_original   NUMERIC(15,2)   NOT NULL DEFAULT 0,
+    value_current    NUMERIC(15,2)   NOT NULL DEFAULT 0,
+    location_code    CHAR(6)         NOT NULL DEFAULT '',
+    notes            VARCHAR(254)    NOT NULL DEFAULT '',
+    reserved1        VARCHAR(80)     NOT NULL DEFAULT '',
+    reserved2        VARCHAR(80)     NOT NULL DEFAULT '',
+    reserved3        VARCHAR(80)     NOT NULL DEFAULT '',
+    reserved4        VARCHAR(80)     NOT NULL DEFAULT '',
+    reserved5        VARCHAR(80)     NOT NULL DEFAULT ''
 );
 
--- ---------------------------------------------------------------
--- EDMACT - Account Ledger
--- ---------------------------------------------------------------
-CREATE TABLE EDMACT (
-    TRANS_ID         CHAR(14)        NOT NULL,
+-- -------------------------------------------------------------------
+-- edm_ledger -- Account ledger (EDMACT)
+-- -------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS edm_ledger (
+    trans_id         CHAR(14)        PRIMARY KEY,
     -- Format: YYYYMMDDHHMMSS
-    CLIENT_ID        CHAR(8)         NOT NULL,
-    ORDER_ID         CHAR(10),
-    TRANS_TYPE       CHAR(2)         NOT NULL,
-    -- CR=Credit, DB=Debit, FE=Fee, AD=Adjustment, PY=Payment
-    AMOUNT           DECIMAL(13,2)   NOT NULL,
-    BALANCE_AFTER    DECIMAL(13,2)   NOT NULL,
-    TRANS_DATE       DECIMAL(8,0)    NOT NULL,
-    TRANS_TIME       DECIMAL(6,0)    NOT NULL,
-    PROCESSED_BY     CHAR(8)         NOT NULL,
-    NOTES            VARCHAR(128),
-    CONSTRAINT PK_EDMACT PRIMARY KEY (TRANS_ID),
-    CONSTRAINT FK_EDMACT_CLIENT
-        FOREIGN KEY (CLIENT_ID) REFERENCES EDMMST(CLIENT_ID),
-    CONSTRAINT CK_EDMACT_TYPE
-        CHECK (TRANS_TYPE IN ('CR','DB','FE','AD','PY'))
+    client_id        CHAR(8)         NOT NULL
+                                     REFERENCES edm_clients(client_id),
+    order_id         CHAR(10)        REFERENCES edm_orders(order_id),
+    trans_type       CHAR(2)         NOT NULL,
+    -- CR=Credit DB=Debit FE=Fee AD=Adjustment PY=Payment
+    amount           NUMERIC(15,2)   NOT NULL,
+    balance_after    NUMERIC(15,2)   NOT NULL,
+    trans_date       DATE            NOT NULL,
+    trans_time       TIME            NOT NULL,
+    processed_by     CHAR(8)         NOT NULL,
+    notes            VARCHAR(128)    NOT NULL DEFAULT '',
+    reserved1        VARCHAR(80)     NOT NULL DEFAULT '',
+    reserved2        VARCHAR(80)     NOT NULL DEFAULT '',
+    reserved3        VARCHAR(80)     NOT NULL DEFAULT '',
+    reserved4        VARCHAR(80)     NOT NULL DEFAULT '',
+    reserved5        VARCHAR(80)     NOT NULL DEFAULT ''
 );
 
--- ---------------------------------------------------------------
--- EDMSEC - Security and Access Control
--- Annoyance Rank tracking and transaction authorization
--- ---------------------------------------------------------------
-CREATE TABLE EDMSEC (
-    USERID           CHAR(8)         NOT NULL,
-    CLIENT_ID        CHAR(8),
-    ANNOYANCE_RANK   SMALLINT        NOT NULL DEFAULT 0,
-    MAX_TRANS_AUTH   CHAR(4),
-    -- Maximum authorized transaction ID prefix (e.g. EDM0=read only)
-    LAST_VIOLATION   DECIMAL(8,0),
-    VIOLATION_COUNT  INTEGER         NOT NULL DEFAULT 0,
-    LAST_LOGIN       DECIMAL(8,0),
-    LAST_TRANS       CHAR(4),
-    STATUS           CHAR(1)         NOT NULL DEFAULT 'A',
-    -- A=Active, S=Suspended, L=Locked, T=Terminated
-    NOTES            VARCHAR(254),
-    CONSTRAINT PK_EDMSEC PRIMARY KEY (USERID),
-    CONSTRAINT FK_EDMSEC_CLIENT
-        FOREIGN KEY (CLIENT_ID) REFERENCES EDMMST(CLIENT_ID)
+CREATE INDEX IF NOT EXISTS edm_ledger_client_idx
+    ON edm_ledger (client_id, trans_date);
+
+-- -------------------------------------------------------------------
+-- edm_security -- Annoyance Rank and access control (EDMSEC)
+-- -------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS edm_security (
+    userid           CHAR(8)         PRIMARY KEY,
+    client_id        CHAR(8)         REFERENCES edm_clients(client_id),
+    annoyance_rank   SMALLINT        NOT NULL DEFAULT 0,
+    max_trans_auth   CHAR(4)         NOT NULL DEFAULT 'EM',
+    -- EM = all EDM transactions; EMR = read-only; EMSC = security only
+    last_violation   DATE,
+    violation_count  INTEGER         NOT NULL DEFAULT 0,
+    last_login       DATE,
+    last_trans       CHAR(4)         NOT NULL DEFAULT '',
+    status           CHAR(1)         NOT NULL DEFAULT 'A',
+    -- A=Active S=Suspended L=Locked T=Terminated
+    notes            VARCHAR(254)    NOT NULL DEFAULT '',
+    reserved1        VARCHAR(80)     NOT NULL DEFAULT '',
+    reserved2        VARCHAR(80)     NOT NULL DEFAULT ''
 );
 
--- ---------------------------------------------------------------
--- EDMARC - Immutable Audit Ledger
--- Append-only; no UPDATE or DELETE permitted
--- Mirrors ESDS VSAM access pattern
--- ---------------------------------------------------------------
-CREATE TABLE EDMARC (
-    SEQ_NO           INTEGER         NOT NULL
-                     GENERATED ALWAYS AS IDENTITY,
-    TRANS_TIMESTAMP  DECIMAL(14,0)   NOT NULL,
-    -- Format: YYYYMMDDHHMMSS
-    USERID           CHAR(8)         NOT NULL,
-    TRANSID          CHAR(4)         NOT NULL,
-    PROGRAM          CHAR(8)         NOT NULL,
-    CLIENT_ID        CHAR(8),
-    ACTION_CODE      CHAR(4)         NOT NULL,
-    -- READ, WRIT, UPDT, DELT, AUTH, VIOL, LOGN, LOGO
-    BEFORE_IMAGE     VARCHAR(254),
-    AFTER_IMAGE      VARCHAR(254),
-    RESULT_CODE      CHAR(4)         NOT NULL,
-    -- SUCC, FAIL, DENY, ABND
-    TERMINAL_ID      CHAR(4),
-    CONSTRAINT PK_EDMARC PRIMARY KEY (SEQ_NO)
+-- -------------------------------------------------------------------
+-- edm_audit -- Immutable audit log (EDMARC)
+-- Append-only by policy. No UPDATE or DELETE permitted.
+-- REVOKE UPDATE, DELETE ON edm_audit FROM PUBLIC after creation.
+-- -------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS edm_audit (
+    seq_no           BIGSERIAL       PRIMARY KEY,
+    trans_timestamp  TIMESTAMP       NOT NULL DEFAULT NOW(),
+    userid           CHAR(8)         NOT NULL,
+    transid          CHAR(4)         NOT NULL,
+    program          CHAR(8)         NOT NULL,
+    client_id        CHAR(8),
+    action_code      CHAR(4)         NOT NULL,
+    -- READ WRIT UPDT DELT AUTH VIOL LOGN LOGO
+    before_image     VARCHAR(254),
+    after_image      VARCHAR(254),
+    result_code      CHAR(4)         NOT NULL,
+    -- SUCC FAIL DENY ABND
+    terminal_id      CHAR(4)         NOT NULL DEFAULT ''
 );
 
--- No UPDATE or DELETE on EDMARC — enforce at application layer
--- and via database grant: REVOKE UPDATE, DELETE ON EDMARC FROM PUBLIC
+CREATE INDEX IF NOT EXISTS edm_audit_ts_idx
+    ON edm_audit (trans_timestamp);
+CREATE INDEX IF NOT EXISTS edm_audit_user_idx
+    ON edm_audit (userid, trans_timestamp);
 
--- ---------------------------------------------------------------
--- Indexes
--- ---------------------------------------------------------------
-CREATE INDEX IX_EDMMST_NAME
-    ON EDMMST (LAST_NAME, FIRST_NAME);
+-- Enforce immutability
+REVOKE UPDATE, DELETE ON edm_audit FROM PUBLIC;
 
-CREATE INDEX IX_EDMMST_STATUS
-    ON EDMMST (STATUS, LOCATION);
-
-CREATE INDEX IX_EDMORD_CLIENT
-    ON EDMORD (CLIENT_ID, ORDER_DATE);
-
-CREATE INDEX IX_EDMORD_STATUS
-    ON EDMORD (ORDER_STATUS, ORDER_DATE);
-
-CREATE INDEX IX_EDMINV_CLIENT
-    ON EDMINV (CLIENT_ID);
-
-CREATE INDEX IX_EDMACT_CLIENT
-    ON EDMACT (CLIENT_ID, TRANS_DATE);
-
-CREATE INDEX IX_EDMARC_TS
-    ON EDMARC (TRANS_TIMESTAMP);
-
-CREATE INDEX IX_EDMARC_USERID
-    ON EDMARC (USERID, TRANS_TIMESTAMP);
+COMMIT;
