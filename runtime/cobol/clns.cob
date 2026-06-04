@@ -15,7 +15,7 @@
       *>  -924   Postgres connection lost
       *>  -952   query timed out
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. EMSI.
+       PROGRAM-ID. CLNS.
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
@@ -44,7 +44,7 @@
            MOVE TRM TO TERMID.
            MOVE 'ENTER=Search  PF3=Exit' TO FOOTER.
 
-           EXEC CICS CONVERSE MAP('EMSI1') FROM(SCR) INTO(SCR)
+           EXEC CICS CONVERSE MAP('CLNS1') FROM(SCR) INTO(SCR)
                               ERASE END-EXEC.
 
            IF EIBAID = PF03
@@ -94,7 +94,7 @@
                    MOVE 'SQL ERROR -- SEE BRICKS CONSOLE LOG.' TO SQLERR
            END-EVALUATE.
 
-           EXEC CICS CONVERSE MAP('EMSI1') FROM(SCR) INTO(SCR)
+           EXEC CICS CONVERSE MAP('CLNS1') FROM(SCR) INTO(SCR)
                               ERASE END-EXEC.
 
            EXEC CICS RETURN END-EXEC.

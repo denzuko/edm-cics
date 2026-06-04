@@ -7,7 +7,7 @@
       *> Screen 1: client ID and order type
       *> Screen 2: value, required date, notes -- confirm/cancel
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. EMOR.
+       PROGRAM-ID. ORDN.
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
@@ -71,7 +71,7 @@
            MOVE 'CLIENT ID + TYPE.  ENTER=Next  PF3=Cancel'
                TO FOOTER1.
 
-           EXEC CICS CONVERSE MAP('EMOR1') FROM(SCR1) INTO(SCR1)
+           EXEC CICS CONVERSE MAP('ORDN1') FROM(SCR1) INTO(SCR1)
                               ERASE END-EXEC.
 
            IF EIBAID = PF03
@@ -94,7 +94,7 @@
            MOVE 'VALUE + DATE + NOTES.  ENTER=Confirm  PF3=Cancel'
                TO FOOTER2.
 
-           EXEC CICS CONVERSE MAP('EMOR2') FROM(SCR2) INTO(SCR2)
+           EXEC CICS CONVERSE MAP('ORDN2') FROM(SCR2) INTO(SCR2)
                               ERASE END-EXEC.
 
            IF EIBAID = PF03
@@ -143,5 +143,5 @@
 
            EXEC SQL COMMIT END-EXEC.
 
-           EXEC CICS SEND MAP('EMOR2') FROM(SCR2) ERASE END-EXEC.
+           EXEC CICS SEND MAP('ORDN2') FROM(SCR2) ERASE END-EXEC.
            EXEC CICS RETURN END-EXEC.
