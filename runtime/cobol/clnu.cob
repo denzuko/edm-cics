@@ -4,11 +4,10 @@
       *> Demonstrates: EXEC CICS WRITE FILE (new record),
       *> EXEC CICS REWRITE FILE (update), DFHRESP(DUPREC).
       *>
-      *> PFY NOTE: WRITE fails with DUPREC if the key already exists.
-      *>           Use REWRITE to update an existing record.
-      *>           This transaction tries WRITE first; on DUPREC it
-      *>           REWRITEs. That is the standard CICS insert-or-update
-      *>           pattern.
+      *> NOTE: WRITE fails with DUPREC if the key already exists.
+      *>       REWRITE updates an existing record.
+      *>       This transaction tries WRITE first; on DUPREC it
+      *>       REWRITEs — the standard CICS insert-or-update pattern.
        IDENTIFICATION DIVISION.
        PROGRAM-ID. CLNU.
 

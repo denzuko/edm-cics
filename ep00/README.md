@@ -3,7 +3,7 @@
 
 ```
 PREPARED BY:    B. O. F. H., Systems Administration
-AUDIENCE:       New acquisition specialists cleared for system access
+AUDIENCE:       Authorized developers
 TONE:           Professional. Do not test me.
 ```
 
@@ -126,14 +126,9 @@ ep00/ .. ep10/  Episode documentation
 | EDMORD | Acquisition order processing | 06 |
 | EDMINV | Asset inventory | 06 |
 | EDMACT | Account ledger | 06 |
-| EDMSEC | Annoyance Rank / access control | 08 |
+| EDMSEC | User access control | 08 |
 | EDMARC | Immutable audit ledger | 09 |
 | EDMRPT | Reporting and inquiry | 10 |
 
 ---
 
-```
-BOFH CLOSING NOTE:
-This tutorial assumes you can read documentation.
-If you cannot, your Annoyance Rank starts at 3.
-```

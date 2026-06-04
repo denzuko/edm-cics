@@ -1,6 +1,5 @@
       *> EMSI -- EDM client lookup via EXEC SQL (COBOL)
       *> Episode 05 -- EDM CICS Tutorial Series
-      *> Ellison Digital Minerals Internal Systems
       *>
       *> Operator types a CLIENT_ID; program runs SELECT INTO against
       *> the edm.edm_clients table and displays the result.
@@ -57,7 +56,7 @@
            EXEC SQL
                SELECT last_name || ', ' || first_name,
                       department,
-                      annoyance_rank,
+                      risk_tier,
                       status
                INTO :CLNAME :NMIND,
                     :DEPT,

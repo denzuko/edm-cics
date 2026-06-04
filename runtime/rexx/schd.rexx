@@ -1,17 +1,15 @@
-/* DPRSC -- Da Planet Radio show schedule (REXX)                   */
+/* SCHD -- DPR show schedule (REXX)                                */
 /* DPR subsystem -- closes issue #2                                */
 /* ACL group: DPR (separate from EDM corporate groups)             */
 /*                                                                 */
-/* DPR_HOST persona: Tier B radio show host character.             */
-/* Manages Da Planet Radio show schedule, playlist, and on-air     */
-/* session logging. Not subject to Annoyance Rank. Probably.       */
+/* Manages DPR show schedule and on-air session logging.          */
 
 ADDRESS CICS
 
 EXEC CICS ASSIGN USERID(USR) TERMID(TRM) END-EXEC
 
 SCR. = ''
-SCR.HEADER  = 'DA PLANET RADIO -- SHOW SCHEDULE'
+SCR.HEADER  = 'DPR -- SHOW SCHEDULE'
 SCR.USERID  = USR
 SCR.FOOTER  = 'ENTER=View  PF1=Go Live  PF3=Exit'
 

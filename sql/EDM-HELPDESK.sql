@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS edm_tickets (
     subject         VARCHAR(120)    NOT NULL,
     description     TEXT            NOT NULL DEFAULT '',
     resolution      TEXT            NOT NULL DEFAULT '',
-    annoyance_event CHAR(1)         NOT NULL DEFAULT 'N',
+    escalated       CHAR(1)         NOT NULL DEFAULT 'N',
     reserved1       VARCHAR(80)     NOT NULL DEFAULT '',
     reserved2       VARCHAR(80)     NOT NULL DEFAULT ''
 );

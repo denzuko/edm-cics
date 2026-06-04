@@ -1,9 +1,7 @@
       *> EMHD -- EDM Helpdesk ticket entry (COBOL)
       *> Helpdesk subsystem -- closes issue #1
       *>
-      *> BOFH NOTE: Every ticket filed here is logged.
-      *>            Frivolous tickets affect Annoyance Rank.
-      *>            You have been warned.
+      *> NOTE: All tickets are logged and audited.
        IDENTIFICATION DIVISION.
        PROGRAM-ID. HLPD.
 

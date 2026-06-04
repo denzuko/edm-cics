@@ -4,9 +4,9 @@
 /* Demonstrates: append-only SQL INSERT, EXEC SQL COMMIT,         */
 /* EXEC CICS ASKTIME / FORMATTIME for timestamp generation.       */
 /*                                                                 */
-/* PFY NOTE: edm_audit has UPDATE and DELETE revoked at the DB    */
-/* level. This program only INSERTs. That is the whole point.     */
-/* The BOFH audits this table. He always finds discrepancies.     */
+/* NOTE: edm_audit has UPDATE and DELETE revoked at the DB level. */
+/* This program only INSERTs. The immutability is enforced by DB  */
+/* permissions, not application logic.                            */
 
 ADDRESS CICS
 

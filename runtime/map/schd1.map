@@ -1,5 +1,4 @@
-* DPRSC1 -- Da Planet Radio show schedule screen
-* DPR persona -- green-on-black distinct from EDM corporate white
+* SCHD1 -- DPR show schedule screen
 MAP DPRSC1 SIZE 24x80
   FIELD HEADER    AT 0,2   LEN 60 PROT BRIGHT COLOR=GREEN
   FIELD USERID    AT 1,70  LEN 8  PROT DIM    COLOR=TURQUOISE

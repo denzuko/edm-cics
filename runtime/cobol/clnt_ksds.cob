@@ -4,9 +4,9 @@
       *> Demonstrates: EXEC CICS READ FILE, DFHRESP(NOTFND),
       *> CONVERSE MAP, pseudo-conversational RETURN.
       *>
-      *> PFY NOTE: BRICKS KSDS files are backed by bbolt on disk.
-      *>           Define the file in CEDA FILE or bricks.cnf before
-      *>           running this transaction. File name: EDMMST
+      *> NOTE: BRICKS KSDS files are backed by bbolt on disk.
+      *>       Define the file in CEDA FILE or bricks.cnf.
+      *>       File name: EDMMST
        IDENTIFICATION DIVISION.
        PROGRAM-ID. CLNT_KSDS.
 

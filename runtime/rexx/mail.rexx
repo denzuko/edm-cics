@@ -1,6 +1,5 @@
 /* EMML -- EDM mailing list / email dispatch (REXX)                */
 /* Episode bonus -- EDM CICS Tutorial Series                       */
-/* Ellison Digital Minerals Internal Systems                       */
 /*                                                                 */
 /* Queues an email to edm_mailq. The queue is drained by an       */
 /* external relay (pg_smtp_client trigger or sidecar process).     */
@@ -10,9 +9,7 @@
 /*   TO LIST: send to a named list in edm_maillists               */
 /*   TO CLIENT: send to a specific client's email via edm_clients  */
 /*                                                                 */
-/* BOFH NOTE: The helpdesk list is monitored. All of it.          */
-/* Composing passive-aggressive messages to clients is an          */
-/* Annoyance Rank event for the sender, not the recipient.         */
+/* NOTE: All helpdesk list traffic is logged for compliance.       */
 
 ADDRESS CICS
 

@@ -1,20 +1,5 @@
-# ELLISON DIGITAL MINERALS
-## Internal Systems Development Programme
-### CICS Transaction Processing — Onboarding Series
-
-```
-CLASSIFICATION: INTERNAL USE ONLY
-DISTRIBUTION:   ALL ACQUISITION SPECIALISTS WITH ANNOYANCE RANK < 7
-PREPARED BY:    Office of Systems Administration (B. O. F. H.)
-APPROVED BY:    Regional Management, Albany District
-```
-
----
-
-> "The mainframe does not care what year it is. Neither do we."
-> — CEO, Ellison Digital Minerals, Launch Day Address
-
----
+# edm-cics
+## Multi-tenant CICS back-office platform on BRICKS_TS
 
 ## What This Is
 
@@ -44,19 +29,19 @@ sql/
 
 ## Episode structure
 
-| Ep | TRANSID | Lang  | Voice | Topic |
-|----|---------|-------|-------|-------|
-| 00 | —       | —     | BOFH  | BRICKS_TS setup, Docker, this repo |
-| 01 | EMHL    | COBOL | PFY   | First transaction — SEND MAP / RETURN |
-| 02 | EMHI    | REXX  | PFY   | REXX twin, map DSL, stem variables |
-| 03 | EMMI    | COBOL | PFY   | EDMMST inquiry — EXEC CICS READ (KSDS) |
-| 04 | EMMW    | COBOL | PFY   | EDMMST write — EXEC CICS WRITE / REWRITE |
-| 05 | EMSI    | COBOL | PFY   | SQL bridge — SELECT INTO from EDM_CLIENTS |
-| 06 | EMOR    | COBOL | PFY   | EDMORD order entry — COMMAREA, multi-screen |
-| 07 | EMLI    | REXX  | PFY   | EXEC CICS LINK — business logic separation |
-| 08 | EMSC    | COBOL | BOFH  | EDMSEC — ASSIGN USERID, Annoyance Rank |
-| 09 | EMARC   | REXX  | PFY   | EDMARC — append-only audit log (ESDS-style) |
-| 10 | EMRP    | COBOL | PHB+PFY | EDMRPT — browse, reports, the Dashboard |
+| Ep | TRANSID | Lang  | Topic |
+|----|---------|-------|-------|
+| 00 | —       | —     | BRICKS_TS setup, Docker, this repo |
+| 01 | CLNT    | REXX  | Client inquiry — SEND MAP, RETURN |
+| 02 | CLNU    | COBOL | Client add/update — WRITE, REWRITE |
+| 03 | CLNS    | COBOL | Client SQL lookup — SELECT INTO |
+| 04 | ORDN    | COBOL | Order entry — COMMAREA, multi-screen |
+| 05 | AUDT    | REXX  | Audit log append — append-only INSERT |
+| 06 | HLPD    | COBOL | Helpdesk ticket entry |
+| 07 | SECU    | COBOL | Access control inquiry |
+| 08 | REPT    | REXX  | Management reports |
+| 09 | MAIL    | REXX  | Mail dispatch |
+| 10 | SCHD    | REXX  | Show schedule (DPR) |
 
 ## Companion repos
 
@@ -69,9 +54,3 @@ BSD-2-Clause. The fictional company is fictional. The COBOL is not.
 
 ---
 
-```
-NOTE FROM BOFH:
-This runs in Docker with postgres. Not on a z/OS.
-Not on Hercules. If you file a ticket asking about JCL
-your Annoyance Rank will be adjusted accordingly.
-```

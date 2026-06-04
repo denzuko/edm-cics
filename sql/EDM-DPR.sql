@@ -1,6 +1,5 @@
--- EDM-DPR.sql -- Da Planet Radio subsystem schema
--- Separate persona: DPR_HOST (Tier B radio show host)
--- ACL group: DPR (distinct from EDM corporate groups)
+-- EDM-DPR.sql -- DPR radio back-office schema
+-- ACL group: DPR
 -- Run after EDM-DDL.sql against the edm database.
 
 BEGIN;
@@ -23,15 +22,13 @@ CREATE TABLE IF NOT EXISTS dpr_shows (
     reserved1       VARCHAR(80)     NOT NULL DEFAULT ''
 );
 
--- Seed Da Planet Radio
+-- Seed default show
 INSERT INTO dpr_shows
     (show_id, show_name, host_userid, day_of_week,
      start_time, duration_mins, description, stream_url)
 VALUES
     ('DPRMAIN ', 'Da Planet Radio', 'DPRHOST ', 'FRI',
-     '21:00', 120,
-     'Live infrastructure, hacking, and surveillance accountability',
-     'https://klaxon.dapla.net')
+     '21:00', 120, '', 'https://klaxon.dapla.net')
 ON CONFLICT DO NOTHING;
 
 -- -------------------------------------------------------------------
@@ -44,7 +41,7 @@ CREATE TABLE IF NOT EXISTS dpr_playlist (
     artist          VARCHAR(80)     NOT NULL DEFAULT '',
     duration_secs   INTEGER         NOT NULL DEFAULT 0,
     file_path       VARCHAR(254)    NOT NULL DEFAULT '',
-    -- Liquidsoap-compatible path for Da Planet Radio
+    -- Liquidsoap-compatible file path
     track_type      CHAR(4)         NOT NULL DEFAULT 'MUSC',
     -- MUSC JING SPOT NEWS LIIV
     queued_at       TIMESTAMP,

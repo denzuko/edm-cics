@@ -1,4 +1,4 @@
--- EDM-DDL.sql -- Ellison Digital Minerals operational database schema
+-- EDM-DDL.sql -- EDM operational database schema
 -- Run once against the 'edm' PostgreSQL database before starting BRICKS_TS.
 -- Pattern follows bank_schema.sql: NUMERIC(15,2) for money,
 -- reserved VARCHAR(80) columns for future expansion, BEGIN/COMMIT wrapper.
@@ -16,8 +16,9 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS edm_clients (
     client_id        CHAR(8)         PRIMARY KEY,
     client_type      CHAR(1)         NOT NULL DEFAULT 'A',
-    -- A=Acquisition Specialist C=Corporate G=Government R=Research
-    annoyance_rank   SMALLINT        NOT NULL DEFAULT 0,
+    -- A=Account C=Corporate G=Government R=Research
+    risk_tier        SMALLINT        NOT NULL DEFAULT 3,
+    -- 1=High 2=Elevated 3=Standard 4=Low
     last_name        VARCHAR(20)     NOT NULL,
     first_name       VARCHAR(15)     NOT NULL,
     title            CHAR(4)         NOT NULL DEFAULT '',
@@ -34,7 +35,7 @@ CREATE TABLE IF NOT EXISTS edm_clients (
     flag_audit       CHAR(1)         NOT NULL DEFAULT 'N',
     flag_hold        CHAR(1)         NOT NULL DEFAULT 'N',
     flag_vip         CHAR(1)         NOT NULL DEFAULT 'N',
-    -- VIP = CEO contact; do not adjust annoyance_rank without approval
+    -- VIP = key account; flag_hold and flag_audit require ADMIN to clear
     reserved1        VARCHAR(80)     NOT NULL DEFAULT '',
     reserved2        VARCHAR(80)     NOT NULL DEFAULT '',
     reserved3        VARCHAR(80)     NOT NULL DEFAULT '',
@@ -126,12 +127,13 @@ CREATE INDEX IF NOT EXISTS edm_ledger_client_idx
     ON edm_ledger (client_id, trans_date);
 
 -- -------------------------------------------------------------------
--- edm_security -- Annoyance Rank and access control (EDMSEC)
+-- edm_security -- User access control and session tracking
 -- -------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS edm_security (
     userid           CHAR(8)         PRIMARY KEY,
     client_id        CHAR(8)         REFERENCES edm_clients(client_id),
-    annoyance_rank   SMALLINT        NOT NULL DEFAULT 0,
+    risk_tier        SMALLINT        NOT NULL DEFAULT 3,
+    -- 1=High 2=Elevated 3=Standard 4=Low
     max_trans_auth   CHAR(4)         NOT NULL DEFAULT 'EM',
     -- EM = all EDM transactions; EMR = read-only; EMSC = security only
     last_violation   DATE,
