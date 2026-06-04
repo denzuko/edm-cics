@@ -1,0 +1,16 @@
+# Compiled objects
+*.obj
+*.o
+
+# Hercules work files
+*.log
+*.pid
+hercules.cnf.bak
+
+# Temp JCL output
+&&*
+
+# Editor cruft
+*.swp
+*~
+.DS_Store
