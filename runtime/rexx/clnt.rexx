@@ -27,7 +27,7 @@ SCR. = ''
 SCR.CLIENTID = CLIENTID
 
 EXEC SQL
-    SELECT client_type, annoyance_rank,
+    SELECT client_type, risk_tier,
            last_name || ', ' || first_name,
            department, location, status,
            asset_count, asset_value

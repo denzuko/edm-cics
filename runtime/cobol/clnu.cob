@@ -1,14 +1,13 @@
-      *> EMMW -- EDMMST client add/update (COBOL)
+      *> CLNU -- Client add/update (COBOL)
       *> Episode 04 -- EDM CICS Tutorial Series
       *>
       *> Demonstrates: EXEC CICS WRITE FILE (new record),
       *> EXEC CICS REWRITE FILE (update), DFHRESP(DUPREC).
       *>
-      *> PFY NOTE: WRITE fails with DUPREC if the key already exists.
-      *>           Use REWRITE to update an existing record.
-      *>           This transaction tries WRITE first; on DUPREC it
-      *>           REWRITEs. That is the standard CICS insert-or-update
-      *>           pattern.
+      *> NOTE: WRITE fails with DUPREC if the key already exists.
+      *>       REWRITE updates an existing record.
+      *>       This transaction tries WRITE first; on DUPREC it
+      *>       REWRITEs — the standard CICS insert-or-update pattern.
        IDENTIFICATION DIVISION.
        PROGRAM-ID. CLNU.
 
@@ -97,5 +96,5 @@
                STOP RUN
            END-IF.
 
-           EXEC CICS RETURN TRANSID('EMMW') IMMEDIATE END-EXEC.
+           EXEC CICS RETURN TRANSID('CLNU') IMMEDIATE END-EXEC.
            STOP RUN.

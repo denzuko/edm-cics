@@ -1,6 +1,5 @@
 /* EMLI -- EXEC CICS LINK demonstration (REXX)                     */
 /* Episode 07 -- EDM CICS Tutorial Series                          */
-/* Ellison Digital Minerals Internal Systems                       */
 /*                                                                 */
 /* Demonstrates: EXEC CICS LINK PROGRAM COMMAREA to call a        */
 /* subordinate program synchronously. The called program          */

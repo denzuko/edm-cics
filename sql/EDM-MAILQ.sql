@@ -1,4 +1,4 @@
--- EDM-MAILQ.sql -- Email outbox queue for EDM ARG helpdesk and
+-- EDM-MAILQ.sql -- Email outbox queue for EDM helpdesk and
 -- customer notifications. Pattern: BRICKS transactions INSERT into
 -- edm_mailq; an external process (pg_smtp_client trigger, pg_cron
 -- job, or sidecar) drains the queue and delivers via SMTP.
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS edm_mailq (
     status          CHAR(1)         NOT NULL DEFAULT 'P',
     -- P=Pending S=Sent F=Failed R=Retry
     retry_count     SMALLINT        NOT NULL DEFAULT 0,
-    from_addr       VARCHAR(120)    NOT NULL DEFAULT 'helpdesk@ellisondm.net',
+    from_addr       VARCHAR(120)    NOT NULL DEFAULT '',
     to_addr         VARCHAR(120)    NOT NULL,
     -- Recipient: looked up from edm_clients.email or explicit address
     client_id       CHAR(8),
@@ -53,15 +53,15 @@ CREATE TABLE IF NOT EXISTS edm_maillists (
     created_date    DATE            NOT NULL DEFAULT CURRENT_DATE
 );
 
--- Seed EDM ARG mailing lists
+-- Seed default mailing lists
 INSERT INTO edm_maillists (list_name, description, list_addr, owner_userid)
 VALUES
     ('helpdesk',          'EDM Helpdesk queue',
-     'helpdesk@ellisondm.net', 'BOFH    '),
-    ('customers-active',  'All active acquisition specialists',
-     'customers@ellisondm.net', 'BOFH    '),
-    ('compliance',        'Compliance notices and Annoyance Rank alerts',
-     'compliance@ellisondm.net', 'BOFH    ')
+     'helpdesk@example.net', 'admin   '),
+    ('customers-active',  'All active clients',
+     'customers@example.net', 'admin   '),
+    ('compliance',        'Compliance notices and security escalations',
+     'compliance@example.net', 'admin   ')
 ON CONFLICT DO NOTHING;
 
 COMMIT;

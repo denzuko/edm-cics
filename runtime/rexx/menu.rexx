@@ -39,7 +39,7 @@ SCR.ORG     = ORG
 
 SELECT
     WHEN (ORG = 'EDM' | ORG = 'ADMIN') THEN DO
-        SCR.HEADER = 'ELLISON DIGITAL MINERALS -- MAIN MENU'
+        SCR.HEADER = 'EDM -- MAIN MENU'
         SCR.OPT1   = '1. Client Registry     (CLNT)'
         SCR.OPT2   = '2. Order Management    (ORDN)'
         SCR.OPT3   = '3. Helpdesk            (HLPD)'
@@ -48,7 +48,7 @@ SELECT
         SCR.FOOTER = 'SELECT OPTION OR TYPE TRANSID DIRECTLY'
     END
     WHEN (ORG = 'DPR') THEN DO
-        SCR.HEADER = 'DA PLANET RADIO -- BACK OFFICE MENU'
+        SCR.HEADER = 'DPR -- BACK OFFICE MENU'
         SCR.OPT1   = '1. Show Schedule       (SCHD)'
         SCR.OPT2   = '2. Traffic Log         (TRAF)'
         SCR.OPT3   = '3. Music Library       (MLIB)'

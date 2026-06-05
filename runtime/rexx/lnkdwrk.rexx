@@ -5,7 +5,7 @@
 /* CLIENT_ID in bytes 1-8; writes the lookup result into bytes    */
 /* 9-68. Never sends to the terminal directly.                     */
 /*                                                                 */
-/* PFY NOTE: linked programs share the same terminal and task as  */
+/* NOTE: linked programs share the same terminal and task as      */
 /* the calling program but have their own variable scope.         */
 /* COMMAREA is the only way to pass data back to the caller.      */
 

@@ -1,12 +1,12 @@
-/* EMARC -- EDMARC immutable audit log append (REXX)               */
+/* AUDT -- Audit log append (REXX)                                 */
 /* Episode 09 -- EDM CICS Tutorial Series                          */
 /*                                                                 */
 /* Demonstrates: append-only SQL INSERT, EXEC SQL COMMIT,         */
 /* EXEC CICS ASKTIME / FORMATTIME for timestamp generation.       */
 /*                                                                 */
-/* PFY NOTE: edm_audit has UPDATE and DELETE revoked at the DB    */
-/* level. This program only INSERTs. That is the whole point.     */
-/* The BOFH audits this table. He always finds discrepancies.     */
+/* NOTE: edm_audit has UPDATE and DELETE revoked at the DB level. */
+/* This program only INSERTs. The immutability is enforced by DB  */
+/* permissions, not application logic.                            */
 
 ADDRESS CICS
 
@@ -40,7 +40,7 @@ EXEC SQL
         (trans_timestamp, userid, transid, program,
          client_id, action_code, after_image, result_code, terminal_id)
     VALUES
-        (:TS, :USR, 'EMARC', 'EMARC',
+        (:TS, :USR, 'AUDT', 'AUDT',
          :CLIENTID, :ACTIONCODE, :NOTES, :RESULTCODE, :TRM)
 END-EXEC
 

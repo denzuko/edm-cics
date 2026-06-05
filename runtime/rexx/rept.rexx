@@ -28,12 +28,6 @@ EXEC SQL
 END-EXEC
 IF SQLCODE = 0 THEN SCR.TOTVAL = TOTVAL
 
-EXEC SQL
-    SELECT COALESCE(MAX(annoyance_rank),0) INTO :HIRANK
-    FROM edm_clients WHERE status = 'A'
-END-EXEC
-IF SQLCODE = 0 THEN SCR.HIRANK = HIRANK
-
 /* Most recent order */
 EXEC SQL
     SELECT order_id, client_id, order_type, order_value, order_status

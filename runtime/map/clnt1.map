@@ -1,7 +1,5 @@
-* EMHELO1 -- EDM welcome screen
-* Populated by EMHL (COBOL) and EMHI (REXX) via SEND MAP FROM.
-* All field values come from the program; this map is layout only.
-MAP EMHELO1 SIZE 24x80
+* CLNT1 -- Client inquiry screen
+MAP CLNT1 SIZE 24x80
   FIELD BANNER   AT 1,1  LEN 60 PROT BRIGHT COLOR=WHITE
   FIELD USERID   AT 3,10 LEN 8  PROT BRIGHT COLOR=TURQUOISE
   FIELD GREETING AT 5,5  LEN 40 PROT BRIGHT COLOR=GREEN
