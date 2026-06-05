@@ -1,49 +1,40 @@
-/* SCHD -- DPR show schedule (REXX)                                */
-/* DPR subsystem -- closes issue #2                                */
-/* ACL group: DPR (separate from EDM corporate groups)             */
+/* SCHD -- Show schedule inquiry and on-air session logging (REXX) */
+/* DPR back-office -- ACL: DPR, ADMIN                              */
 /*                                                                 */
-/* Manages DPR show schedule and on-air session logging.          */
+/* Show schedule inquiry. PF1=Go Live logs on-air session.         */
 
 ADDRESS CICS
 
 EXEC CICS ASSIGN USERID(USR) TERMID(TRM) END-EXEC
 
 SCR. = ''
-SCR.HEADER  = 'DPR -- SHOW SCHEDULE'
+SCR.HEADER  = 'DPR SHOW SCHEDULE'
 SCR.USERID  = USR
-SCR.FOOTER  = 'ENTER=View  PF1=Go Live  PF3=Exit'
+SCR.FOOTER  = 'ENTER=Lookup  PF1=Go Live  PF3=Menu'
 
 EXEC CICS CONVERSE MAP('SCHD1') FROM(SCR.) INTO(SCR.) ERASE END-EXEC
 
 IF EIBAID = 'PF03' THEN DO
-    EXEC CICS RETURN END-EXEC
+    EXEC CICS XCTL PROGRAM('MENU') END-EXEC
     EXIT
 END
 
-/* PF1: open on-air session */
+SHOWID = STRIP(SCR.SHOWID)
+
 IF EIBAID = 'PF01' THEN DO
-    SHOWID = STRIP(SCR.SHOWID)
     EXEC SQL
-        INSERT INTO dpr_oncall (show_id, host_userid)
-        VALUES (:SHOWID, :USR)
+        INSERT INTO dpr_oncall (show_id, host_userid, log_date)
+        VALUES (:SHOWID, :USR, CURRENT_DATE)
     END-EXEC
     IF SQLCODE = 0 THEN DO
         EXEC SQL COMMIT END-EXEC
         SCR.MESSAGE = 'ON AIR. SESSION LOGGED.'
     END
-    ELSE
-        SCR.MESSAGE = 'SESSION LOG FAILED: ' || SQLCODE
+    ELSE SCR.MESSAGE = 'LOG FAILED: ' || SQLCODE
     EXEC CICS SEND MAP('SCHD1') FROM(SCR.) ERASE END-EXEC
-    EXEC CICS RETURN END-EXEC
+    EXEC CICS RETURN TRANSID('SCHD') IMMEDIATE END-EXEC
     EXIT
 END
-
-/* Default: show inquiry */
-SCR.SHOWNAME = ''
-SCR.SHOWDAY  = ''
-SCR.SHOWTIME = ''
-SCR.SHOWSTAT = ''
-SHOWID = STRIP(SCR.SHOWID)
 
 EXEC SQL
     SELECT show_name, day_of_week, start_time, status
@@ -52,14 +43,12 @@ EXEC SQL
     WHERE show_id = :SHOWID
 END-EXEC
 
-IF SQLCODE = 0 THEN
-    SCR.MESSAGE = 'SHOW FOUND.'
-ELSE IF SQLCODE = 100 THEN
-    SCR.MESSAGE = 'SHOW NOT FOUND.'
-ELSE
-    SCR.MESSAGE = 'SQL ERROR: ' || SQLCODE
+SELECT
+    WHEN (SQLCODE = 0)   THEN SCR.MESSAGE = 'SHOW FOUND.'
+    WHEN (SQLCODE = 100) THEN SCR.MESSAGE = 'SHOW NOT FOUND.'
+    OTHERWISE                 SCR.MESSAGE = 'SQL ERROR: ' || SQLCODE
+END
 
 EXEC CICS SEND MAP('SCHD1') FROM(SCR.) ERASE END-EXEC
-EXEC CICS RETURN END-EXEC
-
+EXEC CICS RETURN TRANSID('SCHD') IMMEDIATE END-EXEC
 EXIT

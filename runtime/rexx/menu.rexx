@@ -1,18 +1,9 @@
-/* MENU -- org-aware master menu dispatch                          */
-/* Entry point after CSSN sign-on                                  */
-/* ACL: PUBLIC (all authenticated users)                           */
-/*                                                                 */
-/* Reads the operator's session context, determines their primary  */
-/* org group, and presents the appropriate menu. Dispatches to     */
-/* subsystem transactions via EXEC CICS XCTL.                      */
+/* MENU -- org-aware master menu dispatch (REXX)                   */
+/* ACL: PUBLIC                                                     */
 
 ADDRESS CICS
 
 EXEC CICS ASSIGN USERID(USR) TERMID(TRM) END-EXEC
-
-/* Determine org from ACL group membership */
-/* BRICKS populates EIBSIG with the user's first matching group   */
-/* We check in priority order: ADMIN > EDM > DPR > HLPD > PUBLIC */
 
 ORG = 'PUBLIC'
 
@@ -34,8 +25,8 @@ END-EXEC
 IF SQLCODE <> 0 THEN ORG = 'PUBLIC'
 
 SCR. = ''
-SCR.USERID  = USR
-SCR.ORG     = ORG
+SCR.USERID = USR
+SCR.ORG    = ORG
 
 SELECT
     WHEN (ORG = 'EDM' | ORG = 'ADMIN') THEN DO
@@ -83,12 +74,11 @@ IF EIBAID = 'PF03' THEN DO
     EXIT
 END
 
-/* Dispatch by option number or direct TRANSID input */
-OPT = STRIP(SCR.OPTION)
-
+OPT      = STRIP(SCR.OPTION)
 DISPATCH = ''
+
 SELECT
-    WHEN (ORG = 'EDM' | ORG = 'ADMIN') THEN DO
+    WHEN (ORG = 'EDM' | ORG = 'ADMIN') THEN
         SELECT
             WHEN (OPT = '1') THEN DISPATCH = 'CLNT'
             WHEN (OPT = '2') THEN DISPATCH = 'ORDN'
@@ -97,8 +87,7 @@ SELECT
             WHEN (OPT = '5') THEN DISPATCH = 'MAIL'
             OTHERWISE             DISPATCH = OPT
         END
-    END
-    WHEN (ORG = 'DPR') THEN DO
+    WHEN (ORG = 'DPR') THEN
         SELECT
             WHEN (OPT = '1') THEN DISPATCH = 'SCHD'
             WHEN (OPT = '2') THEN DISPATCH = 'TRAF'
@@ -107,8 +96,7 @@ SELECT
             WHEN (OPT = '5') THEN DISPATCH = 'TBIL'
             OTHERWISE             DISPATCH = OPT
         END
-    END
-    WHEN (ORG = 'HLPD') THEN DO
+    WHEN (ORG = 'HLPD') THEN
         SELECT
             WHEN (OPT = '1') THEN DISPATCH = 'HLPD'
             WHEN (OPT = '2') THEN DISPATCH = 'HDVW'
@@ -116,7 +104,6 @@ SELECT
             WHEN (OPT = '4') THEN DISPATCH = 'CMDB'
             OTHERWISE             DISPATCH = OPT
         END
-    END
     OTHERWISE DISPATCH = OPT
 END
 
@@ -125,5 +112,4 @@ IF LENGTH(STRIP(DISPATCH)) = 4 THEN DO
 END
 
 EXEC CICS RETURN TRANSID('MENU') IMMEDIATE END-EXEC
-
 EXIT

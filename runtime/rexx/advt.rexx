@@ -1,0 +1,47 @@
+/* ADVT -- Advertiser CRM inquiry (REXX)                           */
+/* DPR back-office -- ACL: DPR, ADMIN                              */
+
+ADDRESS CICS
+
+EXEC CICS ASSIGN USERID(USR) TERMID(TRM) END-EXEC
+
+SCR. = ''
+SCR.HEADER = 'DPR ADVERTISER CRM'
+SCR.USERID = USR
+SCR.FOOTER = 'ENTER=Search  PF3=Menu  PF5=Spots'
+
+EXEC CICS CONVERSE MAP('ADVT1') FROM(SCR.) INTO(SCR.) ERASE END-EXEC
+
+IF EIBAID = 'PF03' THEN DO
+    EXEC CICS XCTL PROGRAM('MENU') END-EXEC
+    EXIT
+END
+
+SEARCH = STRIP(SCR.SEARCH)
+
+EXEC SQL
+    SELECT advertiser_id, company_name, contact_name,
+           contact_email, agency_name, status
+    INTO :SCR.ADVTID, :SCR.COMPANY, :SCR.CONTACT,
+         :SCR.EMAIL, :SCR.AGENCY, :SCR.STATF
+    FROM dpr_advertisers
+    WHERE company_name ILIKE '%' || :SEARCH || '%'
+       OR advertiser_id = :SEARCH
+    LIMIT 1
+END-EXEC
+
+SELECT
+    WHEN (SQLCODE = 0)   THEN SCR.MESSAGE = 'FOUND.'
+    WHEN (SQLCODE = 100) THEN SCR.MESSAGE = 'NOT FOUND.'
+    OTHERWISE                 SCR.MESSAGE = 'SQL ERROR: ' || SQLCODE
+END
+
+EXEC CICS CONVERSE MAP('ADVT1') FROM(SCR.) INTO(SCR.) ERASE END-EXEC
+
+IF EIBAID = 'PF03' THEN DO
+    EXEC CICS XCTL PROGRAM('MENU') END-EXEC
+    EXIT
+END
+
+EXEC CICS RETURN TRANSID('ADVT') IMMEDIATE END-EXEC
+EXIT
