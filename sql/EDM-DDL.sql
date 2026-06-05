@@ -174,4 +174,20 @@ CREATE INDEX IF NOT EXISTS edm_audit_user_idx
 -- Enforce immutability
 REVOKE UPDATE, DELETE ON edm_audit FROM PUBLIC;
 
+
+-- -------------------------------------------------------------------
+-- sys_user_orgs -- maps BRICKS userids to org/ACL groups
+-- Drives MENU transaction org detection and role-based dispatch.
+-- -------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS sys_user_orgs (
+    userid  CHAR(8)  NOT NULL,
+    grp     CHAR(8)  NOT NULL,
+    CONSTRAINT pk_sys_user_orgs PRIMARY KEY (userid, grp)
+);
+
+-- Seed admin user
+INSERT INTO sys_user_orgs (userid, grp)
+VALUES ('admin   ', 'ADMIN')
+ON CONFLICT DO NOTHING;
+
 COMMIT;

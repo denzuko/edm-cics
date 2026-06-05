@@ -10,7 +10,7 @@
       *>           REWRITEs. That is the standard CICS insert-or-update
       *>           pattern.
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. EMMW.
+       PROGRAM-ID. CLNU.
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
@@ -49,7 +49,7 @@
            MOVE 'EDM CLIENT ADD / UPDATE -- EMMMST' TO HEADER.
            MOVE 'FILL FIELDS AND PRESS ENTER.  PF3=EXIT' TO FOOTER.
 
-           EXEC CICS CONVERSE MAP('EMMW1') FROM(SCR) INTO(SCR)
+           EXEC CICS CONVERSE MAP('CLNU1') FROM(SCR) INTO(SCR)
                               ERASE END-EXEC.
 
            IF EIBAID = PF03
@@ -89,7 +89,7 @@
                    MOVE 'WRITE ERROR -- SEE BRICKS CONSOLE.' TO MESSAGE
            END-EVALUATE.
 
-           EXEC CICS CONVERSE MAP('EMMW1') FROM(SCR) INTO(SCR)
+           EXEC CICS CONVERSE MAP('CLNU1') FROM(SCR) INTO(SCR)
                               ERASE END-EXEC.
 
            IF EIBAID = PF03

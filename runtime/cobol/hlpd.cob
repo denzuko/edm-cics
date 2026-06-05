@@ -5,7 +5,7 @@
       *>            Frivolous tickets affect Annoyance Rank.
       *>            You have been warned.
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. EMHD.
+       PROGRAM-ID. HLPD.
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
@@ -36,7 +36,7 @@
            MOVE 'GENERAL' TO CATEGORY.
            MOVE 'ENTER=Submit  PF3=Cancel' TO FOOTER.
 
-           EXEC CICS CONVERSE MAP('EMHD1') FROM(SCR) INTO(SCR)
+           EXEC CICS CONVERSE MAP('HLPD1') FROM(SCR) INTO(SCR)
                               ERASE END-EXEC.
 
            IF EIBAID = PF03
@@ -74,6 +74,6 @@
                    MOVE 'INSERT FAILED -- SEE BRICKS CONSOLE.' TO MESSAGE
            END-EVALUATE.
 
-           EXEC CICS SEND MAP('EMHD1') FROM(SCR) ERASE END-EXEC.
+           EXEC CICS SEND MAP('HLPD1') FROM(SCR) ERASE END-EXEC.
            EXEC CICS RETURN END-EXEC.
            STOP RUN.

@@ -8,7 +8,7 @@
       *>           Define the file in CEDA FILE or bricks.cnf before
       *>           running this transaction. File name: EDMMST
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. EMMI.
+       PROGRAM-ID. CLNT_KSDS.
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
@@ -49,7 +49,7 @@
            MOVE 'ENTER CLIENT ID, PRESS ENTER.  PF3=EXIT'
                TO FOOTER.
 
-           EXEC CICS CONVERSE MAP('EMMI1') FROM(SCR) INTO(SCR)
+           EXEC CICS CONVERSE MAP('CLNT1') FROM(SCR) INTO(SCR)
                               ERASE END-EXEC.
 
            IF EIBAID = PF03
@@ -82,7 +82,7 @@
                    MOVE 'FILE ERROR -- SEE BRICKS CONSOLE.' TO MESSAGE
            END-EVALUATE.
 
-           EXEC CICS CONVERSE MAP('EMMI1') FROM(SCR) INTO(SCR)
+           EXEC CICS CONVERSE MAP('CLNT1') FROM(SCR) INTO(SCR)
                               ERASE END-EXEC.
 
            IF EIBAID = PF03

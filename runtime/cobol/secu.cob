@@ -10,7 +10,7 @@
       *> Demonstrates: ASSIGN USERID, SQL SELECT on edm_security,
       *> role-based access check, CONVERSE.
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. EMSC.
+       PROGRAM-ID. SECU.
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
@@ -70,7 +70,7 @@
                    MOVE 'SQL ERROR -- BOFH HAS BEEN NOTIFIED.' TO MESSAGE
            END-EVALUATE.
 
-           EXEC CICS CONVERSE MAP('EMSC1') FROM(SCR) INTO(SCR)
+           EXEC CICS CONVERSE MAP('SECU1') FROM(SCR) INTO(SCR)
                               ERASE END-EXEC.
 
            IF EIBAID = PF03
