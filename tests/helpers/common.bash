@@ -76,3 +76,24 @@ pg_is_up() {
 pg_query() {
     psql -h "${PGHOST}" -p "${PGPORT}" -U "${PGUSER}"          -d "${PGDATABASE}" -tAc "$1" 2>&1
 }
+
+# ── CECI test user ────────────────────────────────────────────────────
+# Requires a user with dev group in runtime/users.conf.
+# Set BRICKS_DEV_USER/PASS or fall back to defaults.
+BRICKS_DEV_USER="${BRICKS_DEV_USER:-devtest}"
+BRICKS_DEV_PASS="${BRICKS_DEV_PASS:-devtest}"
+
+# Ensure the dev test user exists in users.conf.
+# Safe to call multiple times (add_brick_user.bash refuses duplicates).
+ensure_dev_user() {
+    local users_conf="${RUNTIME_DIR}/users.conf"
+    # Only try if we can reach the bricks binary dir
+    local add_user
+    add_user="$(dirname "${BRICKSCOMPILE:-}")/add_brick_user.bash"
+    [ -x "${add_user}" ] || add_user="/srv/bricks/add_brick_user.bash"
+    if [ -f "${users_conf}" ] && ! grep -q "^${BRICKS_DEV_USER}:" "${users_conf}"; then
+        if [ -x "${add_user}" ]; then
+            "${add_user}" "${BRICKS_DEV_USER}" "${BRICKS_DEV_PASS}"                 "dev,users" 2>/dev/null || true
+        fi
+    fi
+}

@@ -6,6 +6,7 @@ Three-tier test architecture:
 |------|-----------|-------|--------------|
 | Unit | `unit/` | `brickscompile` + `bats` | No |
 | Integration | `integration/` | `psql` + `bats` | Postgres only |
+| CECI | `ceci/` | `CECI` + `expect` + `s3270` + `bats` | Full stack + dev user |
 | E2E / Regression | `e2e/` | `expect` + `s3270` + `bats` | Full stack |
 
 ## Quick start
@@ -16,6 +17,10 @@ bats tests/unit/
 
 # Integration (Postgres required)
 PGPASSWORD=brickspassword bats tests/integration/
+
+# CECI tests (bricks + Postgres + dev group user)
+BRICKS_DEV_USER=devtest BRICKS_DEV_PASS=devtest \
+bats tests/ceci/
 
 # Full E2E (bricks + Postgres + expect + s3270)
 BRICKS_HOST=localhost BRICKS_PORT=2300 \
@@ -59,6 +64,22 @@ brew install x3270 expect
 
 - `schema.bats`: all required tables exist; `risk_tier` not `annoyance_rank`;
   `edm_audit` UPDATE/DELETE revoked; seed data present
+
+### CECI — `ceci/`
+
+Requires a running bricks instance and a user with the `dev` group.
+`CECI` is a built-in BRICKS_TS TRANSID (no `transactions.conf` entry)
+that lets developers execute a single `EXEC CICS` or `EXEC SQL` statement
+interactively and inspect the result (EIBRESP, SQLCODE, field values).
+
+- `ceci/sql.bats`: `EXEC SQL SELECT` against all core tables; INSERT into
+  `edm_audit`; verify `REVOKE DELETE` is enforced at DB level
+- `ceci/cics.bats`: `EXEC CICS ASSIGN`, `ASKTIME`, `READ FILE` (NOTFND path),
+  `WRITEQ TS` + `READQ TS` round-trip; dev group denial test
+
+Each test follows the Given/When/Then pattern: Given a running stack and a
+dev-group session, When CECI executes a single verb, Then the response line
+confirms NORMAL or the expected condition.
 
 ### E2E — `e2e/`
 

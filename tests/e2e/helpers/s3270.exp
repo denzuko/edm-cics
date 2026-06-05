@@ -88,7 +88,8 @@ proc bricks_field {sid row col len} {
     expect {
         -i $sid
         timeout { error "Timeout reading field at $row,$col" }
-        -re {data: (.+)?
+        -re {data: (.+)
+?
 } { set result $expect_out(1,string) }
     }
     return [string trim $result]
@@ -102,7 +103,8 @@ proc bricks_screen {sid} {
     expect {
         -i $sid
         timeout { error "Timeout reading screen" }
-        -re {data: (.+)?
+        -re {data: (.+)
+?
 } { set screen $expect_out(1,string) }
     }
     return $screen
@@ -149,4 +151,81 @@ proc bricks_disconnect {sid} {
         eof { }
     }
     catch {close -i $sid}
+}
+
+# ── CECI procedures ───────────────────────────────────────────────────
+
+proc ceci_open {sid} {
+    # Enter CECI from the blank TRANSID prompt
+    send -i $sid "String(CECI)\n"
+    send -i $sid "Enter\n"
+    expect {
+        -i $sid
+        timeout { error "Timeout waiting for CECI screen" }
+        -re {CECI\s+TERM=} { }
+        "CECI requires DEV" { error "User lacks dev group membership" }
+    }
+}
+
+proc ceci_exec {sid statement} {
+    # Clear the input field, type a statement, press PF5 to execute.
+    # Returns the RESPONSE line text.
+    #
+    # PF5 = Execute in CECI
+    # The screen layout:
+    #   Row 0:  CECI header
+    #   Row 2:  Input field (the statement)
+    #   Row 4+: RESPONSE / result scrollable area
+
+    # Clear input area and type statement
+    send -i $sid "EraseField\n"
+    send -i $sid "String($statement)\n"
+    send -i $sid "PF(5)\n"
+
+    expect {
+        -i $sid
+        timeout { error "Timeout waiting for CECI PF5 response" }
+        "ok" { }
+    }
+
+    # Read the RESPONSE line (row 4, col 0, 78 chars)
+    send -i $sid "Ascii(4,0,78)\n"
+    set response ""
+    expect {
+        -i $sid
+        timeout { error "Timeout reading CECI response line" }
+        -re {data: (.+)\r?\n} { set response $expect_out(1,string) }
+    }
+    return [string trim $response]
+}
+
+proc ceci_assert_response {response expected} {
+    # Assert a CECI response line contains expected text
+    if {[string first $expected $response] < 0} {
+        error "CECI response mismatch.\n  Expected to contain: '$expected'\n  Got: '$response'"
+    }
+}
+
+proc ceci_assert_eibresp {sid expected_resp} {
+    # Read EIBRESP from CECI screen (row 6 typically) and assert it
+    send -i $sid "Ascii(6,0,78)\n"
+    set eibresp_line ""
+    expect {
+        -i $sid
+        timeout { error "Timeout reading EIBRESP line" }
+        -re {data: (.+)\r?\n} { set eibresp_line $expect_out(1,string) }
+    }
+    if {[string first "EIBRESP=$expected_resp" $eibresp_line] < 0 &&
+        [string first "EIBRESP = $expected_resp" $eibresp_line] < 0} {
+        error "Expected EIBRESP=$expected_resp, got: $eibresp_line"
+    }
+}
+
+proc ceci_close {sid} {
+    send -i $sid "PF(3)\n"
+    expect {
+        -i $sid
+        timeout { }
+        "ok" { }
+    }
 }
