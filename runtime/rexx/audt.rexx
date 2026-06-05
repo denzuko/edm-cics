@@ -1,4 +1,4 @@
-/* EMARC -- EDMARC immutable audit log append (REXX)               */
+/* AUDT -- Audit log append (REXX)                                 */
 /* Episode 09 -- EDM CICS Tutorial Series                          */
 /*                                                                 */
 /* Demonstrates: append-only SQL INSERT, EXEC SQL COMMIT,         */
@@ -40,7 +40,7 @@ EXEC SQL
         (trans_timestamp, userid, transid, program,
          client_id, action_code, after_image, result_code, terminal_id)
     VALUES
-        (:TS, :USR, 'EMARC', 'EMARC',
+        (:TS, :USR, 'AUDT', 'AUDT',
          :CLIENTID, :ACTIONCODE, :NOTES, :RESULTCODE, :TRM)
 END-EXEC
 

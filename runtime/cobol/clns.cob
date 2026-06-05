@@ -1,4 +1,4 @@
-      *> EMSI -- EDM client lookup via EXEC SQL (COBOL)
+      *> CLNS -- Client SQL lookup (COBOL)
       *> Episode 05 -- EDM CICS Tutorial Series
       *>
       *> Operator types a CLIENT_ID; program runs SELECT INTO against

@@ -4,7 +4,7 @@
 ```
 PREPARED BY:    B. O. F. H., Systems Administration
 AUDIENCE:       Authorized developers
-TONE:           Professional. Do not test me.
+TONE:           Professional.
 ```
 
 ---

@@ -1,4 +1,4 @@
-      *> EMHD -- EDM Helpdesk ticket entry (COBOL)
+      *> HLPD -- Helpdesk ticket entry (COBOL)
       *> Helpdesk subsystem -- closes issue #1
       *>
       *> NOTE: All tickets are logged and audited.

@@ -1,4 +1,4 @@
-/* EMML -- EDM mailing list / email dispatch (REXX)                */
+/* MAIL -- Mail dispatch (REXX)                                    */
 /* Episode bonus -- EDM CICS Tutorial Series                       */
 /*                                                                 */
 /* Queues an email to edm_mailq. The queue is drained by an       */
@@ -16,7 +16,7 @@ ADDRESS CICS
 EXEC CICS ASSIGN USERID(USR) TERMID(TRM) END-EXEC
 
 SCR. = ''
-SCR.HEADER  = 'EDM MAIL DISPATCH -- EMML'
+SCR.HEADER  = 'MAIL DISPATCH'
 SCR.USERID  = USR
 SCR.FOOTER  = 'ENTER=Send  PF3=Cancel'
 
@@ -77,7 +77,7 @@ EXEC SQL
     INSERT INTO edm_mailq
         (to_addr, client_id, subject, body_text, transid, userid)
     VALUES
-        (:TOADDR, NULLIF(:CLIID,''), :SUBJ, :BODY, 'EMML', :USR)
+        (:TOADDR, NULLIF(:CLIID,''), :SUBJ, :BODY, 'MAIL', :USR)
 END-EXEC
 
 IF SQLCODE = 0 THEN DO

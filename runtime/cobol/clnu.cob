@@ -1,4 +1,4 @@
-      *> EMMW -- EDMMST client add/update (COBOL)
+      *> CLNU -- Client add/update (COBOL)
       *> Episode 04 -- EDM CICS Tutorial Series
       *>
       *> Demonstrates: EXEC CICS WRITE FILE (new record),
@@ -96,5 +96,5 @@
                STOP RUN
            END-IF.
 
-           EXEC CICS RETURN TRANSID('EMMW') IMMEDIATE END-EXEC.
+           EXEC CICS RETURN TRANSID('CLNU') IMMEDIATE END-EXEC.
            STOP RUN.

@@ -135,7 +135,7 @@ CREATE TABLE IF NOT EXISTS edm_security (
     risk_tier        SMALLINT        NOT NULL DEFAULT 3,
     -- 1=High 2=Elevated 3=Standard 4=Low
     max_trans_auth   CHAR(4)         NOT NULL DEFAULT 'EM',
-    -- EM = all EDM transactions; EMR = read-only; EMSC = security only
+    -- EDM = all EDM transactions; EDMR = read-only; SECU = security only
     last_violation   DATE,
     violation_count  INTEGER         NOT NULL DEFAULT 0,
     last_login       DATE,

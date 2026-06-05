@@ -1,4 +1,4 @@
-      *> EMMI -- EDMMST client inquiry (COBOL)
+      *> CLNT_KSDS -- Client KSDS inquiry (COBOL)
       *> Episode 03 -- EDM CICS Tutorial Series
       *>
       *> Demonstrates: EXEC CICS READ FILE, DFHRESP(NOTFND),
@@ -90,5 +90,5 @@
                STOP RUN
            END-IF.
 
-           EXEC CICS RETURN TRANSID('EMMI') IMMEDIATE END-EXEC.
+           EXEC CICS RETURN TRANSID('CLNT') IMMEDIATE END-EXEC.
            STOP RUN.

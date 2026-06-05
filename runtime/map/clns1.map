@@ -1,7 +1,6 @@
-* EMSI1 -- EDM client lookup screen
+* CLNS1 -- Client SQL lookup screen
 * CLIENTID is an unprotected input field.
-* All other fields are program-populated output.
-MAP EMSI1 SIZE 24x80
+MAP CLNS1 SIZE 24x80
   FIELD TERMID   AT 0,70  LEN 8  PROT DIM    COLOR=BLUE
   FIELD CLIENTID AT 3,20  LEN 8  UNPROT BRIGHT COLOR=WHITE
   FIELD CLNAME   AT 5,20  LEN 35 PROT BRIGHT COLOR=GREEN

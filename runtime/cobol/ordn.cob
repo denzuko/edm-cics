@@ -1,4 +1,4 @@
-      *> EMOR -- EDMORD acquisition order entry (COBOL)
+      *> ORDN -- Order entry (COBOL)
       *> Episode 06 -- EDM CICS Tutorial Series
       *>
       *> Demonstrates: COMMAREA for pseudo-conversational state,
@@ -83,7 +83,7 @@
            MOVE ORDTYPE  TO CA-ORDTYPE.
            MOVE 2 TO CA-PHASE.
 
-           EXEC CICS RETURN TRANSID('EMOR')
+           EXEC CICS RETURN TRANSID('ORDN')
                COMMAREA(CA-DATA)
                LENGTH(96)
            END-EXEC.
@@ -107,7 +107,7 @@
            MOVE NOTES    TO CA-NOTES.
            MOVE 3 TO CA-PHASE.
 
-           EXEC CICS RETURN TRANSID('EMOR')
+           EXEC CICS RETURN TRANSID('ORDN')
                COMMAREA(CA-DATA)
                LENGTH(96)
            END-EXEC.
