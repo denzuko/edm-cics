@@ -1,0 +1,231 @@
+#!/usr/bin/expect -f
+# tests/e2e/helpers/s3270.exp
+# Shared expect procedures for driving s3270.
+#
+# Usage: source this file from a test script, then:
+#   set sid [bricks_connect $host $port]
+#   bricks_signon $sid $user $password
+#   bricks_transid $sid CLNT
+#   set screen [bricks_screen $sid]
+#   bricks_assert_field $screen "CLIENT REGISTRY"
+#   bricks_disconnect $sid
+
+proc bricks_connect {host port} {
+    # Spawn s3270 and open a connection
+    spawn s3270 -port $port $host
+    set sid $spawn_id
+
+    # Wait for the bricks logo/splash
+    expect {
+        -i $sid
+        timeout { error "Timeout waiting for bricks splash" }
+        "BRICKS" { }
+        "Welcome" { }
+    }
+
+    # Press Enter to clear splash and reach TRANSID prompt
+    send -i $sid "Enter
+"
+    expect {
+        -i $sid
+        timeout { error "Timeout waiting for TRANSID prompt" }
+        "ok" { }
+    }
+
+    return $sid
+}
+
+proc bricks_signon {sid user password} {
+    # Type CSSN and sign on
+    send -i $sid "String(CSSN)
+"
+    send -i $sid "Enter
+"
+    expect {
+        -i $sid
+        timeout { error "Timeout waiting for CSSN screen" }
+        "SIGNON" { }
+        "Userid" { }
+    }
+
+    # Fill userid and password fields
+    # Tab to userid field, type user
+    send -i $sid "String($user)
+"
+    send -i $sid "Tab
+"
+    send -i $sid "String($password)
+"
+    send -i $sid "Enter
+"
+
+    expect {
+        -i $sid
+        timeout { error "Timeout after CSSN submit" }
+        "ok" { }
+    }
+}
+
+proc bricks_transid {sid transid} {
+    # Type a TRANSID at the blank prompt and press Enter
+    send -i $sid "String($transid)
+"
+    send -i $sid "Enter
+"
+    expect {
+        -i $sid
+        timeout { error "Timeout waiting for $transid response" }
+        "ok" { }
+    }
+}
+
+proc bricks_field {sid row col len} {
+    # Read a field value from the screen at row,col for len chars
+    # s3270 Ascii command: Ascii(row,col,len)
+    send -i $sid "Ascii($row,$col,$len)
+"
+    set result ""
+    expect {
+        -i $sid
+        timeout { error "Timeout reading field at $row,$col" }
+        -re {data: (.+)
+?
+} { set result $expect_out(1,string) }
+    }
+    return [string trim $result]
+}
+
+proc bricks_screen {sid} {
+    # Read the full 24x80 screen as text
+    send -i $sid "Ascii(0,0,1920)
+"
+    set screen ""
+    expect {
+        -i $sid
+        timeout { error "Timeout reading screen" }
+        -re {data: (.+)
+?
+} { set screen $expect_out(1,string) }
+    }
+    return $screen
+}
+
+proc bricks_assert_contains {screen text} {
+    if {[string first $text $screen] < 0} {
+        error "Expected screen to contain: '$text'\nActual screen:\n$screen"
+    }
+}
+
+proc bricks_assert_not_contains {screen text} {
+    if {[string first $text $screen] >= 0} {
+        error "Screen should NOT contain: '$text'"
+    }
+}
+
+proc bricks_pf {sid n} {
+    send -i $sid "PF($n)
+"
+    expect {
+        -i $sid
+        timeout { error "Timeout after PF$n" }
+        "ok" { }
+    }
+}
+
+proc bricks_pa {sid n} {
+    send -i $sid "PA($n)
+"
+    expect {
+        -i $sid
+        timeout { error "Timeout after PA$n" }
+        "ok" { }
+    }
+}
+
+proc bricks_disconnect {sid} {
+    send -i $sid "Disconnect
+"
+    expect {
+        -i $sid
+        timeout { }
+        eof { }
+    }
+    catch {close -i $sid}
+}
+
+# ── CECI procedures ───────────────────────────────────────────────────
+
+proc ceci_open {sid} {
+    # Enter CECI from the blank TRANSID prompt
+    send -i $sid "String(CECI)\n"
+    send -i $sid "Enter\n"
+    expect {
+        -i $sid
+        timeout { error "Timeout waiting for CECI screen" }
+        -re {CECI\s+TERM=} { }
+        "CECI requires DEV" { error "User lacks dev group membership" }
+    }
+}
+
+proc ceci_exec {sid statement} {
+    # Clear the input field, type a statement, press PF5 to execute.
+    # Returns the RESPONSE line text.
+    #
+    # PF5 = Execute in CECI
+    # The screen layout:
+    #   Row 0:  CECI header
+    #   Row 2:  Input field (the statement)
+    #   Row 4+: RESPONSE / result scrollable area
+
+    # Clear input area and type statement
+    send -i $sid "EraseField\n"
+    send -i $sid "String($statement)\n"
+    send -i $sid "PF(5)\n"
+
+    expect {
+        -i $sid
+        timeout { error "Timeout waiting for CECI PF5 response" }
+        "ok" { }
+    }
+
+    # Read the RESPONSE line (row 4, col 0, 78 chars)
+    send -i $sid "Ascii(4,0,78)\n"
+    set response ""
+    expect {
+        -i $sid
+        timeout { error "Timeout reading CECI response line" }
+        -re {data: (.+)\r?\n} { set response $expect_out(1,string) }
+    }
+    return [string trim $response]
+}
+
+proc ceci_assert_response {response expected} {
+    # Assert a CECI response line contains expected text
+    if {[string first $expected $response] < 0} {
+        error "CECI response mismatch.\n  Expected to contain: '$expected'\n  Got: '$response'"
+    }
+}
+
+proc ceci_assert_eibresp {sid expected_resp} {
+    # Read EIBRESP from CECI screen (row 6 typically) and assert it
+    send -i $sid "Ascii(6,0,78)\n"
+    set eibresp_line ""
+    expect {
+        -i $sid
+        timeout { error "Timeout reading EIBRESP line" }
+        -re {data: (.+)\r?\n} { set eibresp_line $expect_out(1,string) }
+    }
+    if {[string first "EIBRESP=$expected_resp" $eibresp_line] < 0 &&
+        [string first "EIBRESP = $expected_resp" $eibresp_line] < 0} {
+        error "Expected EIBRESP=$expected_resp, got: $eibresp_line"
+    }
+}
+
+proc ceci_close {sid} {
+    send -i $sid "PF(3)\n"
+    expect {
+        -i $sid
+        timeout { }
+        "ok" { }
+    }
+}
